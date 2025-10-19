@@ -1,0 +1,47 @@
+#include <Servo.h>
+
+Servo leftMirror;
+Servo rightMirror;
+
+#define IR_DRIVER 8
+#define PARK_PIN 7
+
+bool parked = false;
+
+void setup() {
+  Serial.begin(9600);
+  leftMirror.attach(5);
+  rightMirror.attach(6);
+  pinMode(IR_DRIVER, INPUT);
+  pinMode(PARK_PIN, INPUT);
+  
+  leftMirror.write(0);
+  rightMirror.write(0);
+  Serial.println("Smart EV Side Mirror Adjustment System");
+}
+
+void loop() {
+  int driverDetected = digitalRead(IR_DRIVER);
+  int parkingStatus = digitalRead(PARK_PIN);
+
+  // Adjust mirrors when driver sits
+  if(driverDetected == HIGH && !parked) {
+    leftMirror.write(90);
+    rightMirror.write(90);
+    Serial.println("Mirrors Adjusted - Driver Seated");
+    delay(2000);
+  }
+
+  // Auto fold mirrors when parked
+  if(parkingStatus == HIGH) {
+    leftMirror.write(0);
+    rightMirror.write(0);
+    parked = true;
+    Serial.println("Mirrors Folded - Car Parked");
+    delay(2000);
+  } else {
+    parked = false;
+  }
+
+  delay(500);
+}
